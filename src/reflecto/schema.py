@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+RE_ANGSTROM = 2.81794032e-5
+
 @dataclass
 class Instrument:
     wavelength: float = 1.54
@@ -11,14 +13,28 @@ class Instrument:
 
 @dataclass
 class Layer:
-    thickness: float
-    roughness: float
-    sld: float
+    thickness: float  # [Å]
+    roughness: float  # [Å]
+    sld: complex  # [10^-6 Å^-2]
     f: complex = field(default=complex(1, 0), repr=False)
 
     @property
     def density(self) -> float:
-        return self.sld / self.f.real if self.f.real != 0 else 0.0
+        """
+        Unit: [atoms / Å^3]
+        Formula:
+            SLD = r_e * rho * f
+            rho = SLD / (r_e * f)
+        """
+        if self.f.real == 0:
+            return 0.0
+
+        real_sld_value = self.sld.real * 1e-6 
+        
+        return real_sld_value / (RE_ANGSTROM * self.f.real)
+
+AIR = Layer(thickness=0, roughness=0, sld=complex(0, 0))
+SI_SUBSTRATE = Layer(thickness=0, roughness=2.0, sld=complex(20.1, 0.46))
 
 @dataclass
 class Sample:
@@ -29,14 +45,6 @@ class Sample:
 @dataclass
 class Experiment:
     q: np.ndarray
-    R: np.ndarray
+    refl: np.ndarray
     instrument: Instrument
     sample: Sample
-
-@dataclass
-class FitParam:
-    value: float
-    min: float
-    max: float
-    active: bool = True
-

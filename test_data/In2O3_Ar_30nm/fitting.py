@@ -1,9 +1,8 @@
 import os
 import pandas as pd
 import tkinter as tk
-from tkinter import filedialog, simpledialog, messagebox
+from tkinter import filedialog, simpledialog
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator # 눈금 조절을 위해 추가
 import re
 
 def plot_xrr_data(input_file_path, output_image_file, sample_label):

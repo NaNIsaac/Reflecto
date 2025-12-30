@@ -33,14 +33,18 @@ def plot_analysis_result(q: np.ndarray, R_measured: np.ndarray, result: dict, ti
     plt.title(title)
     plt.legend()
     plt.grid(True, which="both", alpha=0.3)
+
     
     # 텍스트 정보 추가 (피팅 결과)
     if 'fit_params' in result:
+        r_e = 28.179403227
+
         fp = result['fit_params']
+        electron_density = fp['set_film_sld'] / r_e
         info_text = (
-            f"Thickness: {fp['set_f_d']:.2f} Å\n"
-            f"Roughness: {fp['set_f_sig']:.2f} Å\n"
-            f"SLD: {fp['set_f_sld']:.2f}"
+            f"Thickness: {fp['set_film_thick']:.2f} Å\n"
+            f"Roughness: {fp['set_film_rough']:.2f} Å\n"
+            f"Electron Density: {electron_density:.2f}"
         )
         # 그래프 오른쪽 상단에 텍스트 박스 배치
         plt.text(0.95, 0.95, info_text, transform=plt.gca().transAxes, 

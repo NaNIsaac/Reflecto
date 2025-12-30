@@ -24,8 +24,9 @@ def main():
 
     # [Step 1] 데이터 로드
     data_dir = Path("test_data") / "In2O3_Ar_30nm"
-    file_path = data_dir / "#1.dat"
-    
+    # data_dir = Path("test_data") / "unknown"
+    file_path = data_dir / "#2.dat"
+
     if not file_path.exists():
         print(f"❌ Error: File not found at {file_path}")
         return
@@ -47,7 +48,7 @@ def main():
     
     # 1. AI Initial Guess (요청하신 기능)
     pred = result['prediction']
-    print(f"[AI Initial Guess]")
+    print("[AI Initial Guess]")
     print(f"  - Thickness : {pred['thickness']:.2f} Å")
     print(f"  - Roughness : {pred['roughness']:.2f} Å")
     print(f"  - SLD       : {pred['sld']:.2f} (x10⁻⁶ Å⁻²)")
@@ -55,9 +56,9 @@ def main():
 
     # 2. Final Fit Parameters
     fit = result['fit_params']
-    fit_sld, fit_d, fit_sig = fit['set_f_sld'], fit['set_f_d'], fit['set_f_sig']
+    fit_sld, fit_d, fit_sig = fit['set_film_sld'], fit['set_film_thick'], fit['set_film_rough']
 
-    print(f"[Final GenX Fit]")
+    print("[Final GenX Fit]")
     print(f"  - Thickness : {fit_d:.2f} Å")
     print(f"  - Roughness : {fit_sig:.2f} Å")
     print(f"  - SLD       : {fit_sld:.2f} (x10⁻⁶ Å⁻²)")
@@ -81,13 +82,14 @@ def main():
         reflecto.plot_analysis_result(qs, R, result)
 
         # 2. Electron Density Profile Plot
-        ambient = ParamSet.from_genx_layer(AIR)
-        final_film = ParamSet(fit_d, fit_sig, fit_sld)
-        final_sio2 = ParamSet(fit['set_s_d'], fit['set_s_sig'], fit['set_s_sld'])
-        final_substrate = ParamSet.from_genx_layer(SUBSTRATE_SI)
-        
-        z, sld_profile = calc_profile([ambient, final_film, final_sio2, final_substrate])
-        plot_profile(z, sld_profile, title=f"EDP (In2O3, {dens_ratio:.0f}%)")
+        # ambient = ParamSet.from_genx_layer(AIR)
+        # final_film = ParamSet(fit_d, fit_sig, fit_sld)
+        # final_film = ParamSet(fit_d, fit_sig, fit_sld)
+        # final_sio2 = ParamSet(fit['set_oxide_thick'], fit['set_oxide_rough'], fit['set_oxide_sld'])
+        # final_substrate = ParamSet.from_genx_layer(SUBSTRATE_SI)
+
+        # z, sld_profile = calc_profile([ambient, final_film, final_sio2, final_substrate])
+        # plot_profile(z, sld_profile, title=f"EDP (In2O3, {dens_ratio:.0f}%)")
     else:
         print("[3] Plotting skipped by user option.")
 

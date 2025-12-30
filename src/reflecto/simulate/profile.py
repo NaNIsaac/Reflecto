@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.special import erf
 
-from ..simulate.simulate import ParamSet
 
 def calc_profile(layers: list, z_step: float = 0.5, padding: float = 30.0):
     """

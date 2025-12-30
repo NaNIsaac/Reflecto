@@ -1,4 +1,3 @@
-import numpy as np
 from .physics_utils import r_e 
 
 MATERIAL_DB = {

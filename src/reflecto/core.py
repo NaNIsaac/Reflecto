@@ -3,7 +3,7 @@ import numpy as np
 
 from .engines.inference import XRRInferenceEngine
 from .engines.fitting import GenXFitter
-from .simulate.simulate import ParamSet, param2refl 
+from .simulate.simulate import param2refl 
 
 PACKAGE_DIR = Path(__file__).parent
 DEFAULT_MODEL_DIR = PACKAGE_DIR / "assets"

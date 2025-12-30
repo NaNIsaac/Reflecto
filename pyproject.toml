@@ -11,6 +11,7 @@ dependencies = [
     "tqdm>=4.67.1",
     "bumps>=1.0.3",
     "pandas>=2.3.3",
+    "rich>=14.2.0",
 ]
 
 [tool.setuptools.package-data]

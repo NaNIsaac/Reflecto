@@ -14,82 +14,82 @@ def to_f(sld_val):
 class Sim_Vars:
     def __init__(self):
         # Film (AI Guess)
-        self.f_d   = {init_params['f_d']}
-        self.f_sig = {init_params['f_sig']}
-        self.f_sld = {init_params['f_sld']}
+        self.film_thick = {init_params['film_thick']}
+        self.film_rough = {init_params['film_rough']}
+        self.film_sld   = {init_params['film_sld']}
 
         # SiO2 (Fixed/Guess)
-        self.s_d   = 15.0
-        self.s_sig = 3.0
-        self.s_sld = 18.8
+        self.oxide_thick = 15.0
+        self.oxide_rough = 3.0
+        self.oxide_sld   = 18.8
 
         # Instrument
-        self.i0    = 1.0
-        self.s_len = {init_params['s_len']}
-        self.beam_w = {init_params['beam_w']}
-        self.ibkg = 1e-7
+        self.inst_i0    = 1.0
+        self.sample_len = {init_params['sample_len']}
+        self.beam_width = {init_params['beam_width']}
+        self.inst_bkg   = 1e-7
 
     # =================================================================
     # [FIX] GenX requires BOTH Setters AND Getters for every parameter
     # =================================================================
 
     # --- Film ---
-    def set_f_d(self, v): self.f_d = float(v)
-    def get_f_d(self): return self.f_d
+    def set_film_thick(self, v): self.film_thick = float(v)
+    def get_film_thick(self): return self.film_thick
 
-    def set_f_sig(self, v): self.f_sig = float(v)
-    def get_f_sig(self): return self.f_sig
+    def set_film_rough(self, v): self.film_rough = float(v)
+    def get_film_rough(self): return self.film_rough
 
-    def set_f_sld(self, v): self.f_sld = float(v)
-    def get_f_sld(self): return self.f_sld
+    def set_film_sld(self, v): self.film_sld = float(v)
+    def get_film_sld(self): return self.film_sld
     
     # --- SiO2 ---
-    def set_s_d(self, v): self.s_d = float(v)
-    def get_s_d(self): return self.s_d
+    def set_oxide_thick(self, v): self.oxide_thick = float(v)
+    def get_oxide_thick(self): return self.oxide_thick
 
-    def set_s_sig(self, v): self.s_sig = float(v)
-    def get_s_sig(self): return self.s_sig
+    def set_oxide_rough(self, v): self.oxide_rough = float(v)
+    def get_oxide_rough(self): return self.oxide_rough
 
-    def set_s_sld(self, v): self.s_sld = float(v)
-    def get_s_sld(self): return self.s_sld
+    def set_oxide_sld(self, v): self.oxide_sld = float(v)
+    def get_oxide_sld(self): return self.oxide_sld
     
     # --- Instrument ---
-    def set_i0(self, v): self.i0 = float(v)
-    def get_i0(self): return self.i0
+    def set_inst_i0(self, v): self.inst_i0 = float(v)
+    def get_inst_i0(self): return self.inst_i0
 
-    def set_s_len(self, v): self.s_len = float(v)
-    def get_s_len(self): return self.s_len
+    def set_sample_len(self, v): self.sample_len = float(v)
+    def get_sample_len(self): return self.sample_len
 
-    def set_beam_w(self, v): self.beam_w = float(v)
-    def get_beam_w(self): return self.beam_w
+    def set_beam_width(self, v): self.beam_width = float(v)
+    def get_beam_width(self): return self.beam_width
 
-    def set_ibkg(self, v): self.ibkg = float(v)
-    def get_ibkg(self): return self.ibkg
+    def set_inst_bkg(self, v): self.inst_bkg = float(v)
+    def get_inst_bkg(self): return self.inst_bkg
 
 v = Sim_Vars()
 
 # Layer Definitions
 Amb = Layer(d=0, f=0, dens=0)
 Sub = Layer(d=0, f=to_f(20.07), dens=1, sigma=3.0)
-Film = Layer(d=v.f_d, sigma=v.f_sig, f=to_f(v.f_sld), dens=1)
-SiO2 = Layer(d=v.s_d, sigma=v.s_sig, f=to_f(v.s_sld), dens=1)
+Film = Layer(d=v.film_thick, sigma=v.film_rough, f=to_f(v.film_sld), dens=1)
+SiO2 = Layer(d=v.oxide_thick, sigma=v.oxide_rough, f=to_f(v.oxide_sld), dens=1)
 
 sample = Sample(Stacks=[Stack(Layers=[Film, SiO2])], Ambient=Amb, Substrate=Sub)
 
 # Instrument Definitions
 inst = Instrument(
     probe=Probe.xray, wavelength=1.54, coords=Coords.q,
-    I0=v.i0, Ibkg=v.ibkg, res=0.002,
+    I0=v.inst_i0, Ibkg=v.inst_bkg, res=0.002,
     restype=ResType.fast_conv,
     footype=FootType.gauss,
-    samplelen=v.s_len,
-    beamw=v.beam_w
+    samplelen=v.sample_len,
+    beamw=v.beam_width
 )
 
 def Sim(data):
     # Dynamic update hook
-    Film.d, Film.sigma, Film.f = v.f_d, v.f_sig, to_f(v.f_sld)
-    SiO2.d, SiO2.sigma, SiO2.f = v.s_d, v.s_sig, to_f(v.s_sld)
-    inst.I0, inst.samplelen, inst.beamw = v.i0, v.s_len, v.beam_w
+    Film.d, Film.sigma, Film.f = v.film_thick, v.film_rough, to_f(v.film_sld)
+    SiO2.d, SiO2.sigma, SiO2.f = v.oxide_thick, v.oxide_rough, to_f(v.oxide_sld)
+    inst.I0, inst.samplelen, inst.beamw = v.inst_i0, v.sample_len, v.beam_width
     return [Specular(d.x, sample, inst) for d in data]
 """

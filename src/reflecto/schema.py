@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 
@@ -48,3 +49,16 @@ class Experiment:
     refl: np.ndarray
     instrument: Instrument
     sample: Sample
+
+@dataclass
+class FitParam:
+    value: float
+    min: float
+    max: float
+    active: bool = True
+
+@dataclass
+class FitTarget:
+    obj: Any
+    attr_name: str
+    spec: FitParam

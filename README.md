@@ -1,5 +1,7 @@
 # Reflecto
 
+Superseded by [ReflectoLearn](https://github.com/NaNIsaac/ReflectoLearn); the GenX fit lives on as `reflectolearn.genx_fit` (`genx` extra).
+
 Single-layer X-ray reflectivity (XRR) analysis: a 1D CNN predicts film thickness, roughness and SLD from a measured curve, then GenX refines the fit.
 
 XRR 측정 곡선(2θ, intensity `.dat`)에서 학습된 CNN 으로 박막 두께 · 거칠기 · SLD 초기값을 추정하고, GenX(genx3) 로 막/SiO₂/Si 모델을 정밀 피팅하는 라이브러리. 개인 연구용 실험 코드이며 유지보수되는 패키지는 아님.

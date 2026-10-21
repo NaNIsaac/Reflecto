@@ -1,0 +1,60 @@
+{
+    "exp_name": "sub_rough_variation",
+    "base_dir": "D:\\03_Resources\\Data\\XRR_AI\\exp07",
+    "param_ranges": {
+        "thickness": [
+            10.0,
+            1200.0
+        ],
+        "roughness": [
+            0.0,
+            15.0
+        ],
+        "sld": [
+            5.0,
+            100.0
+        ],
+        "sio2_thickness": [
+            10.0,
+            30.0
+        ],
+        "sio2_roughness": [
+            1.0,
+            5.0
+        ],
+        "sio2_sld": [
+            5.0,
+            22.0
+        ]
+    },
+    "simulation": {
+        "wavelength": 1.54,
+        "n_samples": 100000,
+        "q_points": 2000,
+        "q_min": 0.0035604632351793394,
+        "q_max": 1.0650912378689954
+    },
+    "model": {
+        "use_fourier": true,
+        "fourier_scale": 15.0,
+        "n_channels": 64,
+        "depth": 6,
+        "mlp_hidden": 512,
+        "dropout": 0.1
+    },
+    "training": {
+        "batch_size": 64,
+        "epochs": 150,
+        "lr": 0.0002,
+        "weight_decay": 0.0001,
+        "val_ratio": 0.1,
+        "test_ratio": 0.1,
+        "patience": 20,
+        "num_workers": 4,
+        "augment": true,
+        "expand_factor": 20,
+        "aug_prob": 0.9,
+        "intensity_scale": 0.25,
+        "q_shift_sigma": 0.004
+    }
+}

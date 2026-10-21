@@ -1,6 +1,6 @@
 {
     "exp_name": "sub_rough_variation",
-    "base_dir": "D:\\03_Resources\\Data\\XRR_AI\\exp07",
+    "base_dir": "D:\\GoogleDrive\\03_Data\\XRR_AI\\exp07",
     "param_ranges": {
         "thickness": [
             10.0,

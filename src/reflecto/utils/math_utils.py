@@ -2,6 +2,7 @@ import warnings
 
 import numpy as np
 
+
 def powerspace(
     start: float,
     stop: float,
@@ -14,11 +15,13 @@ def powerspace(
     x = np.linspace(0, 1, num, endpoint=endpoint, dtype=dtype, axis=axis)
     return start + (stop - start) * x**power
 
+
 def fom_log(ref_exp, ref_calc):
     """
     Calculates the Figure of Merit (FOM) based on the log-scale reflectivity difference.
     """
     return np.mean(np.abs(np.log10(ref_exp) - np.log10(ref_calc)))
+
 
 def i0_normalize(arr):
     """
@@ -34,7 +37,8 @@ def i0_normalize(arr):
         # during runtime that doesn't halt execution but requires attention.
         warnings.warn(
             "Input array contains only zero values (max value is 0). Normalization skipped. Returning original array.",
-            RuntimeWarning, stacklevel=2
+            RuntimeWarning,
+            stacklevel=2,
         )
         return arr
     return arr / arr.max()
@@ -42,6 +46,7 @@ def i0_normalize(arr):
 
 def main() -> None:
     import matplotlib.pyplot as plt
+
     power_grid = powerspace(0.1, 0.8, 100, power=1.8)
     plt.plot(power_grid)
     plt.show()

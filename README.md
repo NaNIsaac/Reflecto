@@ -24,10 +24,12 @@ uv run main.py              # test_data/In2O3_Ar_30nm/#2_xrr.dat 분석 (저장�
 import reflecto
 from reflecto.utils.math_utils import i0_normalize
 
-df = reflecto.read_dat("sample.dat")            # 2열: tth, intensity (공백 구분, # 주석)
+df = reflecto.read_dat("sample.dat")  # 2열: tth, intensity (공백 구분, # 주석)
 q = reflecto.tth2q(df["tth"].to_numpy())
 R = i0_normalize(df["intensity"].to_numpy())
-result = reflecto.analyze(q, R, fit=True)       # result["prediction"], result["fit_params"], result["fom"]
+result = reflecto.analyze(
+    q, R, fit=True
+)  # result["prediction"], result["fit_params"], result["fom"]
 reflecto.plot_analysis_result(q, R, result)
 ```
 

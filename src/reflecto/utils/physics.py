@@ -1,4 +1,4 @@
-from typing import Final, overload, Tuple
+from typing import Final, overload
 
 import numpy as np
 import scipy.constants as const
@@ -6,11 +6,14 @@ from numpy.typing import NDArray
 
 r_e: Final[float] = 2.8179403227e-5
 
+
 @overload
 def tth2q(tth: float, wavelen: float = 1.54) -> float: ...
 
+
 @overload
 def tth2q(tth: NDArray[np.float64], wavelen: float = 1.54) -> NDArray[np.float64]: ...
+
 
 def tth2q(tth, wavelen=1.54):
     """
@@ -24,6 +27,7 @@ def tth2q(tth, wavelen=1.54):
         return float(result)
     return result
 
+
 def sld_to_density(sld: float | np.ndarray) -> float | np.ndarray:
     """
     SLD (10^-6 A^-2)를 Electron Density (electrons/cm^3)로 변환합니다.
@@ -31,15 +35,16 @@ def sld_to_density(sld: float | np.ndarray) -> float | np.ndarray:
     """
     return (sld * 1e-6 / r_e) * 1e24
 
-def calc_theoretical_sld(density: float, total_z: int, molar_mass: float) -> Tuple[float, float]:
+
+def calc_theoretical_sld(density: float, total_z: int, molar_mass: float) -> tuple[float, float]:
     """
     물질의 밀도와 화학 정보를 받아 이론적인 SLD와 전자 밀도를 계산합니다.
-    
+
     Args:
         density (float): 밀도 (g/cm^3)
         total_z (int): 분자당 총 원자 번호 (총 전자 수)
         molar_mass (float): 분자량 (g/mol)
-        
+
     Returns:
         Tuple[float, float]: (SLD [x10^-6 A^-2], Electron Density [e/A^3])
     """
@@ -50,17 +55,20 @@ def calc_theoretical_sld(density: float, total_z: int, molar_mass: float) -> Tup
     # 2. SLD (A^-2) -> XRR 툴 호환을 위해 1e6을 곱해 반환
     # SLD = r_e * rho_e
     sld_val = r_e * rho_e * 1e6
-    
+
     return sld_val, rho_e
 
-def sld_to_material_properties(sld: float, total_z: float, molar_mass: float) -> Tuple[float, float]:
+
+def sld_to_material_properties(
+    sld: float, total_z: float, molar_mass: float
+) -> tuple[float, float]:
     """
     Convert fitted SLD to Physical Densities using Chemical Information (Form Factor).
-    
+
     Physics:
         SLD = r_e * (rho_mass * N_A / M) * f_1
         (Assuming f_1 approx Z for standard XRR)
-    
+
     Args:
         sld (float): SLD value in x10^-6 A^-2
         total_z (float): Total Form Factor (Total Z of the molecule)

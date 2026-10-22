@@ -7,9 +7,9 @@ import numpy as np
 from genx.models.spec_nx import Layer, Sample, Specular, Stack
 from tqdm import tqdm
 
+from ..simulate.noise import add_noise
 from ..utils.consts_genx import AIR, SURFACE_SIO2, XRAY_TUBE
 from ..utils.physics import r_e
-from ..simulate.noise import add_noise
 
 
 @dataclass
@@ -31,20 +31,11 @@ class ParamSet:
         # f는 복소수이므로 실수부(real)만 취함 (전자밀도 관련)
         sld_val = (layer.f.real * layer.dens * r_e) * 1e6
 
-        return cls(
-            thickness=float(layer.d),
-            roughness=float(layer.sigma),
-            sld=float(sld_val)
-        )
+        return cls(thickness=float(layer.d), roughness=float(layer.sigma), sld=float(sld_val))
 
     def to_layer(self) -> Layer:
         """Return genx Layer object"""
-        return Layer(
-        d=self.thickness,
-        f=get_f(self.sld),
-        dens=1.0,
-        sigma=self.roughness
-        )
+        return Layer(d=self.thickness, f=get_f(self.sld), dens=1.0, sigma=self.roughness)
 
     def __format__(self, format_spec: str) -> str:
         formatted = [
@@ -63,7 +54,9 @@ def get_f(sld_1e6: float) -> complex:
     return complex((sld_1e6 * 1e-6) / r_e, 0)
 
 
-def build_sample(film_params: list[ParamSet], sio2_param: ParamSet, sub_param: ParamSet | None = None) -> Sample:
+def build_sample(
+    film_params: list[ParamSet], sio2_param: ParamSet, sub_param: ParamSet | None = None
+) -> Sample:
     """
     Create GenX Sample with explicit Si Substrate.
     Structure: Si Substrate -> Film -> Surface SiO2 -> Ambient
@@ -72,17 +65,11 @@ def build_sample(film_params: list[ParamSet], sio2_param: ParamSet, sub_param: P
         sub_param = ParamSet(0, 3, 20.1)
     layers = [sio2_param.to_layer()]
     for param in film_params:
-        layers.append(
-            param.to_layer()
-        )
+        layers.append(param.to_layer())
 
     stack = Stack(Layers=layers, Repetitions=1)
 
-    sample = Sample(
-        Stacks=[stack],
-        Ambient=AIR,
-        Substrate=sub_param.to_layer()
-    )
+    sample = Sample(Stacks=[stack], Ambient=AIR, Substrate=sub_param.to_layer())
     return sample
 
 
@@ -99,7 +86,9 @@ def calc_refl(sample: Sample, qs: np.ndarray) -> np.ndarray:
     return reflectivity
 
 
-def param2refl(qs: np.ndarray, film_params: list[ParamSet], sio2_param: ParamSet | None = None) -> np.ndarray:
+def param2refl(
+    qs: np.ndarray, film_params: list[ParamSet], sio2_param: ParamSet | None = None
+) -> np.ndarray:
     if sio2_param is None:
         sio2_param = ParamSet.from_genx_layer(SURFACE_SIO2)
     sample = build_sample(film_params, sio2_param)
@@ -108,19 +97,19 @@ def param2refl(qs: np.ndarray, film_params: list[ParamSet], sio2_param: ParamSet
 
 class XRRSimulator:
     def __init__(
-            self,
-            qs: np.ndarray,
-            n_samples: int,
-            n_layers: int,
-            # Ranges
-            thickness_range: tuple[float, float] = (10.0, 500.0),
-            roughness_range: tuple[float, float] = (0.0, 20.0),
-            sld_range: tuple[float, float] = (5.0, 20.0),
-            sio2_thick_range: tuple[float, float] = (10.0, 25.0),
-            sio2_rough_range: tuple[float, float] = (2.0, 5.0),
-            sio2_sld_mean: float = 18.8,
-            has_noise: bool = False,
-            ):
+        self,
+        qs: np.ndarray,
+        n_samples: int,
+        n_layers: int,
+        # Ranges
+        thickness_range: tuple[float, float] = (10.0, 500.0),
+        roughness_range: tuple[float, float] = (0.0, 20.0),
+        sld_range: tuple[float, float] = (5.0, 20.0),
+        sio2_thick_range: tuple[float, float] = (10.0, 25.0),
+        sio2_rough_range: tuple[float, float] = (2.0, 5.0),
+        sio2_sld_mean: float = 18.8,
+        has_noise: bool = False,
+    ):
 
         self.qs = qs
         self.n_samples = n_samples
@@ -169,22 +158,24 @@ class XRRSimulator:
     def save_hdf5(self, file: str | Path, show_progress: bool = True) -> None:
         file = Path(file)
 
-        with h5py.File(file, 'w') as hf:
+        with h5py.File(file, "w") as hf:
             hf.create_dataset("q", data=self.qs)
 
-            d_thick = hf.create_dataset("thickness", (self.n_samples, self.n_layers), dtype='f4')
-            d_rough = hf.create_dataset("roughness", (self.n_samples, self.n_layers), dtype='f4')
-            d_sld = hf.create_dataset("sld", (self.n_samples, self.n_layers), dtype='f4')
+            d_thick = hf.create_dataset("thickness", (self.n_samples, self.n_layers), dtype="f4")
+            d_rough = hf.create_dataset("roughness", (self.n_samples, self.n_layers), dtype="f4")
+            d_sld = hf.create_dataset("sld", (self.n_samples, self.n_layers), dtype="f4")
 
-            d_s_thick = hf.create_dataset("sio2_thickness", (self.n_samples, 1), dtype='f4')
-            d_s_rough = hf.create_dataset("sio2_roughness", (self.n_samples, 1), dtype='f4')
-            d_s_sld = hf.create_dataset("sio2_sld", (self.n_samples, 1), dtype='f4')
+            d_s_thick = hf.create_dataset("sio2_thickness", (self.n_samples, 1), dtype="f4")
+            d_s_rough = hf.create_dataset("sio2_roughness", (self.n_samples, 1), dtype="f4")
+            d_s_sld = hf.create_dataset("sio2_sld", (self.n_samples, 1), dtype="f4")
 
-            d_refl = hf.create_dataset("R", (self.n_samples, len(self.qs)), dtype='f4')
+            d_refl = hf.create_dataset("R", (self.n_samples, len(self.qs)), dtype="f4")
 
             iterator = self.generate_batch()
             if show_progress:
-                iterator = tqdm(iterator, total=self.n_samples, desc="Simulating", dynamic_ncols=True)
+                iterator = tqdm(
+                    iterator, total=self.n_samples, desc="Simulating", dynamic_ncols=True
+                )
 
             for i, (fps, sp, r) in enumerate(iterator):
                 d_thick[i] = np.array([fp.thickness for fp in fps])
@@ -193,7 +184,7 @@ class XRRSimulator:
 
                 d_s_thick[i] = sp.thickness
                 d_s_rough[i] = sp.roughness
-                d_s_sld[i]   = sp.sld
+                d_s_sld[i] = sp.sld
 
                 d_refl[i] = r
 
@@ -211,7 +202,7 @@ def main():
         thickness_range=(50, 150),
         roughness_range=(0, 5),
         sld_range=(8, 12),
-        has_noise=False
+        has_noise=False,
     )
 
     print("Testing Simulation...")
@@ -219,9 +210,9 @@ def main():
         print(f"Films: {films}")
         print(f"SiO2: {sio2}")
 
-        plt.figure(figsize=(6,4))
+        plt.figure(figsize=(6, 4))
         plt.plot(qs, refl)
-        plt.yscale('log')
+        plt.yscale("log")
         title: str = f"SiO2: {sio2:.2g}\n"
         title += "\n".join(f"{i}: {film:.2g}" for i, film in enumerate(films, 1))
         plt.title(title)

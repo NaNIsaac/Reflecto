@@ -1,14 +1,16 @@
 from pathlib import Path
+
 import numpy as np
 
-from .engines.inference import XRRInferenceEngine
 from .engines.fitting import GenXFitter
-from .simulate.simulate import ParamSet, param2refl 
+from .engines.inference import XRRInferenceEngine
+from .simulate.simulate import ParamSet, param2refl
 
 PACKAGE_DIR = Path(__file__).parent
 DEFAULT_MODEL_DIR = PACKAGE_DIR / "assets"
 
 _GLOBAL_ENGINE = None
+
 
 def load_default_engine(device: str = None) -> XRRInferenceEngine:
     global _GLOBAL_ENGINE
@@ -18,12 +20,13 @@ def load_default_engine(device: str = None) -> XRRInferenceEngine:
         _GLOBAL_ENGINE = XRRInferenceEngine(DEFAULT_MODEL_DIR, device=device)
     return _GLOBAL_ENGINE
 
+
 def analyze(
-    q: np.ndarray, 
-    R: np.ndarray, 
+    q: np.ndarray,
+    R: np.ndarray,
     engine: XRRInferenceEngine | None = None,
     fit: bool = True,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> dict:
 
     if engine is None:
@@ -41,7 +44,7 @@ def analyze(
         "prediction": {
             "thickness": ai_film.thickness,
             "roughness": ai_film.roughness,
-            "sld": ai_film.sld
+            "sld": ai_film.sld,
         },
         "ai_curve": ai_curve,
     }
@@ -51,7 +54,7 @@ def analyze(
             print("Refining with GenX...")
         fitter = GenXFitter(q, R, ai_film)
         fit_res = fitter.run(verbose=verbose)
-        
+
         result["fit_params"] = fit_res
         result["fit_curve"] = fitter.model.data[0].y_sim
         result["fom"] = float(fitter.model.fom)

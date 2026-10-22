@@ -1,6 +1,6 @@
 class GenXScriptBuilder:
     """GenX 모델 내부에서 실행될 파이썬 스크립트를 생성합니다."""
-    
+
     def build(self, init_params: dict[str, float]) -> str:
         return f"""
 import numpy as np
@@ -14,9 +14,9 @@ def to_f(sld_val):
 class Sim_Vars:
     def __init__(self):
         # Film (AI Guess)
-        self.f_d   = {init_params['f_d']}
-        self.f_sig = {init_params['f_sig']}
-        self.f_sld = {init_params['f_sld']}
+        self.f_d   = {init_params["f_d"]}
+        self.f_sig = {init_params["f_sig"]}
+        self.f_sld = {init_params["f_sld"]}
 
         # SiO2 (Fixed/Guess)
         self.s_d   = 15.0
@@ -25,8 +25,8 @@ class Sim_Vars:
 
         # Instrument
         self.i0    = 1.0
-        self.s_len = {init_params['s_len']}
-        self.beam_w = {init_params['beam_w']}
+        self.s_len = {init_params["s_len"]}
+        self.beam_w = {init_params["beam_w"]}
         self.ibkg = 1e-7
 
     # =================================================================

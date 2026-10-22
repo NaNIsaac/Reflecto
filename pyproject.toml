@@ -13,6 +13,14 @@ dependencies = [
     "pandas>=2.3.3",
 ]
 
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+# not an installed package: the tests import it from src/
+pythonpath = ["src"]
+testpaths = ["tests"]
+
 [tool.setuptools.package-data]
 reflecto = ["assets/*.pt", "assets/*.json"]
 

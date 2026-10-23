@@ -4,17 +4,24 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from .model import XRRPhysicsModel
 
-from reflecto.utils.math_utils import i0_normalize
 from reflecto.simulate.simulate import ParamSet, param2refl
+from reflecto.utils.math_utils import i0_normalize
+
+from .model import XRRPhysicsModel
 
 
 class XRRPreprocessor:
     """XRR 데이터 전처리 및 역변환을 담당하는 유틸리티 클래스"""
-    def __init__(self, qs: np.ndarray, stats_file: Path | str | None = None, device: torch.device = torch.device('cpu')):
+
+    def __init__(
+        self,
+        qs: np.ndarray,
+        stats_file: Path | str | None = None,
+        device: torch.device | None = None,
+    ):
         self.target_q = qs
-        self.device = device
+        self.device = device if device is not None else torch.device("cpu")
         self.param_mean = None
         self.param_std = None
 
@@ -40,17 +47,22 @@ class XRRPreprocessor:
         R_interp = np.interp(self.target_q, q_raw, R_log, left=-15.0, right=-15.0)
         q_valid_mask = (self.target_q >= np.min(q_raw)) & (self.target_q <= np.max(q_raw))
 
-        return torch.stack([
-            torch.from_numpy(R_interp.astype(np.float32)),
-            torch.from_numpy(q_valid_mask.astype(np.float32))
-        ], dim=0)
+        return torch.stack(
+            [
+                torch.from_numpy(R_interp.astype(np.float32)),
+                torch.from_numpy(q_valid_mask.astype(np.float32)),
+            ],
+            dim=0,
+        )
 
     def denormalize(self, params_norm: torch.Tensor) -> np.ndarray:
         """모델의 정규화된 출력을 실제 물리량(A, x10^-6 A^-2)으로 변환"""
         if self.param_mean is None:
             raise ValueError("Normalization statistics not loaded.")
 
-        mean = self.param_mean.cpu().numpy() if torch.is_tensor(self.param_mean) else self.param_mean
+        mean = (
+            self.param_mean.cpu().numpy() if torch.is_tensor(self.param_mean) else self.param_mean
+        )
         std = self.param_std.cpu().numpy() if torch.is_tensor(self.param_std) else self.param_std
 
         return params_norm.detach().cpu().numpy() * std + mean
@@ -59,7 +71,9 @@ class XRRPreprocessor:
 class XRRInferenceEngine:
     def __init__(self, exp_dir: str | Path, device: str | None = None):
         self.exp_dir = Path(exp_dir)
-        self.device = torch.device(device if device else ("cuda" if torch.cuda.is_available() else "cpu"))
+        self.device = torch.device(
+            device if device else ("cuda" if torch.cuda.is_available() else "cpu")
+        )
 
         self._validate_paths()
         self._load_config()
@@ -84,18 +98,18 @@ class XRRInferenceEngine:
     def _load_model(self):
         m_conf = self.config["model"]
         model_args = {
-            'q_len': len(self.target_qs),
-            'input_channels': 2,
-            'n_channels': m_conf["n_channels"],
-            'depth': m_conf["depth"],
-            'mlp_hidden': m_conf["mlp_hidden"],
-            'dropout': 0.0,
-            'use_fourier': m_conf.get("use_fourier", True),
-            'fourier_scale': m_conf.get("fourier_scale", 10.0)
+            "q_len": len(self.target_qs),
+            "input_channels": 2,
+            "n_channels": m_conf["n_channels"],
+            "depth": m_conf["depth"],
+            "mlp_hidden": m_conf["mlp_hidden"],
+            "dropout": 0.0,
+            "use_fourier": m_conf.get("use_fourier", True),
+            "fourier_scale": m_conf.get("fourier_scale", 10.0),
         }
         self.model = XRRPhysicsModel(**model_args).to(self.device)
         ckpt = torch.load(self.exp_dir / "best.pt", map_location=self.device, weights_only=True)
-        self.model.load_state_dict(ckpt['model_state_dict'])
+        self.model.load_state_dict(ckpt["model_state_dict"])
         self.model.eval()
 
     def predict(self, q_raw: np.ndarray, R_raw: np.ndarray) -> ParamSet:
@@ -109,23 +123,38 @@ class XRRInferenceEngine:
         # 물리적 제약조건 적용 (음수 방지)
         y_real = np.maximum(y_real, [1.0, 0.0, 0.0])
 
-        return ParamSet(thickness=float(y_real[0]), roughness=float(y_real[1]), sld=float(y_real[2]))
+        return ParamSet(
+            thickness=float(y_real[0]), roughness=float(y_real[1]), sld=float(y_real[2])
+        )
 
-    def plot_ai_guess(self, q_measured: np.ndarray, R_measured: np.ndarray, ai_params: ParamSet, save_path: Path | None = None):
+    def plot_ai_guess(
+        self,
+        q_measured: np.ndarray,
+        R_measured: np.ndarray,
+        ai_params: ParamSet,
+        save_path: Path | None = None,
+    ):
         """AI의 초기 추측값과 실측 데이터를 비교하는 플롯 생성"""
         # AI 예측 파라미터로 곡선 생성
         R_ai = param2refl(q_measured, [ai_params])
 
         plt.figure(figsize=(10, 6))
-        plt.plot(q_measured, i0_normalize(R_measured), 'ko', markersize=3, alpha=0.3, label='Measured Data')
-        plt.plot(q_measured, R_ai, 'r--', lw=2, label=f'AI Guess (d={ai_params.thickness:.1f}Å)')
+        plt.plot(
+            q_measured,
+            i0_normalize(R_measured),
+            "ko",
+            markersize=3,
+            alpha=0.3,
+            label="Measured Data",
+        )
+        plt.plot(q_measured, R_ai, "r--", lw=2, label=f"AI Guess (d={ai_params.thickness:.1f}Å)")
 
-        plt.yscale('log')
-        plt.xlabel(r'$q$ ($\AA^{-1}$)')
-        plt.ylabel('Reflectivity')
-        plt.title('Initial AI Prediction (Guess)', fontsize=14, fontweight='bold')
+        plt.yscale("log")
+        plt.xlabel(r"$q$ ($\AA^{-1}$)")
+        plt.ylabel("Reflectivity")
+        plt.title("Initial AI Prediction (Guess)", fontsize=14, fontweight="bold")
         plt.legend()
-        plt.grid(True, which='both', alpha=0.2)
+        plt.grid(True, which="both", alpha=0.2)
 
         if save_path:
             plt.savefig(save_path, dpi=150)

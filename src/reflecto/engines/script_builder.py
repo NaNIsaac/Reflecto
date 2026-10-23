@@ -90,6 +90,6 @@ def Sim(data):
     # Dynamic update hook
     Film.d, Film.sigma, Film.f = v.f_d, v.f_sig, to_f(v.f_sld)
     SiO2.d, SiO2.sigma, SiO2.f = v.s_d, v.s_sig, to_f(v.s_sld)
-    inst.I0, inst.samplelen, inst.beamw = v.i0, v.s_len, v.beam_w
+    inst.I0, inst.Ibkg, inst.samplelen, inst.beamw = v.i0, v.ibkg, v.s_len, v.beam_w
     return [Specular(d.x, sample, inst) for d in data]
 """

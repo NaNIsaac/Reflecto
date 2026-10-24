@@ -7,22 +7,14 @@ import pandas as pd
 from matplotlib.ticker import MultipleLocator
 
 
-# ─────────────────────────────────────────
-# 1. 그래프 생성 함수 (스타일 파라미터 적용)
-# ─────────────────────────────────────────
 def plot_profile(df, png_path, sample_label, styles):
-    """스타일 설정을 적용하여 전자밀도 프로파일 그래프를 생성합니다."""
+    """Create the electron density profile graph with the given style parameters."""
 
     fig, ax = plt.subplots(figsize=(8, 6))
 
     y_values = df["Electron Density(e/cm³)"] / 1e23
     ax.plot(df["z(Å)"], y_values, color="black", lw=1.5, label=sample_label)
 
-    # ==========================================================
-    # === 스타일 적용 부분 ===
-    # ==========================================================
-
-    # 1. 제목 설정
     ax.set_title(
         "Electron Density Profile",
         fontsize=styles["title_fontsize"],
@@ -30,7 +22,6 @@ def plot_profile(df, png_path, sample_label, styles):
         pad=15,
     )
 
-    # 2. 축 제목 설정 (원래 코드대로 복원)
     ax.set_xlabel(
         r"Distance from Substrate (Å)",
         fontsize=styles["xlabel_fontsize"],
@@ -42,7 +33,6 @@ def plot_profile(df, png_path, sample_label, styles):
         weight=styles["ylabel_fontweight"],
     )
 
-    # 3. ×10²³ 표시 (원래 코드대로 고정 위치에 표시)
     ax.annotate(
         r"$\times10^{23}$",
         xy=(0, 1),
@@ -54,7 +44,6 @@ def plot_profile(df, png_path, sample_label, styles):
         va="center",
     )
 
-    # 4. 축 눈금 숫자 크기 및 선 두께
     ax.tick_params(
         axis="both",
         which="major",
@@ -73,18 +62,15 @@ def plot_profile(df, png_path, sample_label, styles):
         right=True,
     )
 
-    # 5. 범례 설정
     if sample_label:
         legend = ax.legend(loc="upper right", fontsize=styles["legend_fontsize"], frameon=True)
         legend.get_frame().set_edgecolor("black")
         legend.get_frame().set_linewidth(styles["legend_border_linewidth"])
 
-    # 6. 그래프 전체 테두리 두께
     for spine in ax.spines.values():
         spine.set_linewidth(styles["spine_linewidth"])
         spine.set_color("black")
 
-    # 7. 격자 설정
     ax.grid(
         True,
         which="major",
@@ -93,9 +79,6 @@ def plot_profile(df, png_path, sample_label, styles):
         alpha=styles["grid_alpha"],
     )
 
-    # ==========================================================
-
-    # X, Y축 범위 설정
     ax.set_xlim(df["z(Å)"].min(), df["z(Å)"].max())
 
     if styles["y_axis_limits"]:
@@ -122,9 +105,6 @@ def plot_profile(df, png_path, sample_label, styles):
         print(f"그래프 파일 저장 중 오류 발생: {e}")
 
 
-# ─────────────────────────────────────────
-# 2. SLD 데이터 변환 함수 (변경 없음)
-# ─────────────────────────────────────────
 def convert_sld(file_path):
     base_directory = os.path.dirname(file_path)
     output_folder = os.path.join(base_directory, "electron_density_results")
@@ -173,9 +153,6 @@ def convert_sld(file_path):
         return None, None, None
 
 
-# ─────────────────────────────────────────
-# 3. 메인 프로그램 실행부
-# ─────────────────────────────────────────
 def main():
     root = tk.Tk()
     root.withdraw()
@@ -203,15 +180,9 @@ def main():
         if sample_label is None:
             sample_label = default_name
 
-        # ╔══════════════════════════════════════════════════════════════════╗
-        # ║                    ★ Y축 상한값 수정 부분 ★                     ║
-        # ║               이 숫자만 바꾸면 Y축 최댓값이 변경됩니다            ║
-        # ╚══════════════════════════════════════════════════════════════════╝
-        Y_AXIS_MAX = 27  # ← 이 숫자를 원하는 값으로 바꾸세요
+        # Upper limit of the y axis; change this value to rescale
+        Y_AXIS_MAX = 27
 
-        # ════════════════════════════════════════════════════════════════════
-
-        # 그래프 스타일 설정 (Y축 상한 제외한 나머지 스타일)
         styles = {
             "title_fontsize": 16,
             "title_fontweight": "bold",
@@ -227,7 +198,6 @@ def main():
             "spine_linewidth": 2.0,
             "grid_linewidth": 1.0,
             "grid_alpha": 0.8,
-            # Y축 설정 (위에서 설정한 Y_AXIS_MAX 값 사용)
             "y_axis_limits": [0, Y_AXIS_MAX],
             "y_tick_increment": 2.5,
         }

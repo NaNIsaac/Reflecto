@@ -5,13 +5,11 @@ from tkinter import filedialog, messagebox, simpledialog
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from matplotlib.ticker import MaxNLocator  # 눈금 조절을 위해 추가
+from matplotlib.ticker import MaxNLocator
 
 
 def plot_xrr_data(input_file_path, output_image_file, sample_label):
-    """
-    XRR 데이터 파일(.dat)을 읽어 요청된 스타일로 그래프를 생성합니다.
-    """
+    """Read an XRR .dat file and plot the data with its fit in the requested style."""
     try:
         df = pd.read_csv(
             input_file_path,
@@ -40,40 +38,29 @@ def plot_xrr_data(input_file_path, output_image_file, sample_label):
         )
         ax.plot(df["x"], df["fit"], color="red", linewidth=2.5, label=f"{sample_label} FIT")
 
-        # ==========================================================
-        # === 여기를 수정하여 그래프 스타일을 변경할 수 있습니다 ===
-        # ==========================================================
         ax.set_yscale("log")
 
-        # 1. 축 제목 글자 크기 및 굵기 조절
         ax.set_xlabel("2theta (°)", fontsize=16, weight="bold")
         ax.set_ylabel("Intensity (Arb.units)", fontsize=16, weight="bold")
 
-        # 2. 축 눈금 숫자 크기 및 선 두께 조절
-        # labelsize: 눈금 숫자 크기, width: 눈금 선의 두께
         ax.tick_params(
             axis="both", which="major", labelsize=16, direction="in", top=True, right=True, width=2
         )
         ax.tick_params(axis="both", which="minor", direction="in", top=True, right=True, width=1.5)
 
-        # 3. Y축 눈금 숫자 제거
         ax.set_yticklabels([])
 
-        # 4. 범례 상자 테두리 굵기 및 글자 크기 조절
         legend = ax.legend(loc="upper right", fontsize=14, frameon=True)
         legend.get_frame().set_edgecolor("black")
         legend.get_frame().set_linewidth(2)
 
-        # 5. 그래프 전체 테두리 굵기 및 색상 조절
         for spine in ax.spines.values():
             spine.set_linewidth(2.0)
             spine.set_color("black")
 
-        # 6. 축 눈금 위치 및 개수 조절
-        # 아래 코드 앞의 '#'을 제거하여 사용하세요.
-        # ax.xaxis.set_major_locator(MaxNLocator(nbins=6)) # 방법 1: 눈금 최대 개수 지정
-        # ax.set_xticks([0, 2, 4, 6, 8, 10]) # 방법 2: 눈금 위치 직접 지정
-        # ==========================================================
+        # Optional tick control; uncomment one:
+        # ax.xaxis.set_major_locator(MaxNLocator(nbins=6))  # cap the number of ticks
+        # ax.set_xticks([0, 2, 4, 6, 8, 10])  # set tick positions explicitly
 
         plt.tight_layout()
 

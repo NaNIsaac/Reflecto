@@ -24,11 +24,11 @@ class ParamSet:
     @classmethod
     def from_genx_layer(cls, layer: Layer) -> "ParamSet":
         """
-        GenX Layer 객체를 ParamSet으로 변환합니다.
-        f (scattering factor)를 SLD (10^-6 A^-2) 단위로 역변환합니다.
+        Convert a GenX Layer to a ParamSet.
+        f (scattering factor) is converted back to SLD (10^-6 A^-2).
         Formula: SLD_val = (f.real * dens * r_e) * 1e6
         """
-        # f는 복소수이므로 실수부(real)만 취함 (전자밀도 관련)
+        # f is complex; only the real part enters the SLD
         sld_val = (layer.f.real * layer.dens * r_e) * 1e6
 
         return cls(thickness=float(layer.d), roughness=float(layer.sigma), sld=float(sld_val))
@@ -128,7 +128,6 @@ class XRRSimulator:
         """Generator for (Film_Params, SiO2_Params, Reflectivity)"""
 
         for _ in range(self.n_samples):
-            # 1. Main Film
             film_params: list[ParamSet] = []
             for _ in range(self.n_layers):
                 f_d = np.random.uniform(self.t_min, self.t_max)
@@ -137,13 +136,11 @@ class XRRSimulator:
                 f_sld = np.random.uniform(self.s_min, self.s_max)
                 film_params.append(ParamSet(f_d, f_sig, f_sld))
 
-            # 2. SiO2
             s_d = np.random.uniform(self.st_min, self.st_max)
             s_sig = np.random.uniform(self.sr_min, self.sr_max)
             s_sld = np.random.normal(self.sio2_sld_mean, 0.5)
             sio2_p = ParamSet(s_d, s_sig, s_sld)
 
-            # 3. Simulate
             try:
                 refl = param2refl(self.qs, film_params, sio2_p)
             except RuntimeError as e:

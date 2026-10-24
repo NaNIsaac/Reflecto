@@ -4,10 +4,7 @@ import torch.nn as nn
 
 
 class FourierFeatureMapping(nn.Module):
-    """
-    Random Fourier Features:
-    좌표(q)를 고차원 주파수 공간으로 매핑하여 고주파(High-Frequency) 패턴 학습을 돕습니다.
-    """
+    """Random Fourier features of q, to help the network fit high-frequency fringes."""
 
     def __init__(self, input_dim=1, mapping_size=64, scale=10.0):
         super().__init__()
@@ -38,7 +35,7 @@ class XRRPhysicsModel(nn.Module):
         super().__init__()
         self.use_fourier = use_fourier
 
-        # Checkpoint 호환성을 위한 Config 저장
+        # Stored for checkpoint compatibility
         self.config = {
             "q_len": q_len,
             "input_channels": input_channels,

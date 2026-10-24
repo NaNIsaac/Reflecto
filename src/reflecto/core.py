@@ -32,7 +32,6 @@ def analyze(
     if engine is None:
         engine = load_default_engine()
 
-    # 1. AI 추론 (Prediction)
     if verbose:
         print("Running AI Inference...")
     ai_film = engine.predict(q, R)

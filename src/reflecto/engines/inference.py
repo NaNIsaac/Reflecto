@@ -12,7 +12,7 @@ from .model import XRRPhysicsModel
 
 
 class XRRPreprocessor:
-    """XRR 데이터 전처리 및 역변환을 담당하는 유틸리티 클래스"""
+    """Resamples measured XRR data onto the model grid and denormalizes model outputs."""
 
     def __init__(
         self,
@@ -34,12 +34,12 @@ class XRRPreprocessor:
         self.param_std = stats["param_std"]
 
     def process_input(self, q_raw: np.ndarray, R_raw: np.ndarray) -> torch.Tensor:
-        """실측 데이터(Linear)를 모델 입력용 텐서(Grid-aligned Log)로 변환"""
+        """Convert linear reflectivity to a log10 tensor on the model q grid plus a valid mask."""
         R_raw = np.nan_to_num(R_raw, nan=1e-15, posinf=1e-15, neginf=1e-15)
         R_norm = i0_normalize(R_raw)
         R_log = np.log10(np.maximum(R_norm, 1e-15))
 
-        # 정렬 보장
+        # np.interp needs ascending q
         if q_raw[0] > q_raw[-1]:
             q_raw, R_log = q_raw[::-1], R_log[::-1]
 
@@ -56,7 +56,7 @@ class XRRPreprocessor:
         )
 
     def denormalize(self, params_norm: torch.Tensor) -> np.ndarray:
-        """모델의 정규화된 출력을 실제 물리량(A, x10^-6 A^-2)으로 변환"""
+        """Convert normalized model output to physical units (A, x10^-6 A^-2)."""
         if self.param_mean is None:
             raise ValueError("Normalization statistics not loaded.")
 
@@ -113,14 +113,14 @@ class XRRInferenceEngine:
         self.model.eval()
 
     def predict(self, q_raw: np.ndarray, R_raw: np.ndarray) -> ParamSet:
-        """AI 추론을 수행하고 ParamSet 객체를 반환"""
+        """Run inference and return the prediction as a ParamSet."""
         x = self.processor.process_input(q_raw, R_raw).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
             y_pred_norm = self.model(x).squeeze(0)
 
         y_real = self.processor.denormalize(y_pred_norm)
-        # 물리적 제약조건 적용 (음수 방지)
+        # Clip to physical bounds: thickness >= 1, roughness and SLD >= 0
         y_real = np.maximum(y_real, [1.0, 0.0, 0.0])
 
         return ParamSet(
@@ -134,8 +134,7 @@ class XRRInferenceEngine:
         ai_params: ParamSet,
         save_path: Path | None = None,
     ):
-        """AI의 초기 추측값과 실측 데이터를 비교하는 플롯 생성"""
-        # AI 예측 파라미터로 곡선 생성
+        """Plot the measured curve against the AI-predicted one."""
         R_ai = param2refl(q_measured, [ai_params])
 
         plt.figure(figsize=(10, 6))

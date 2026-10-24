@@ -15,11 +15,11 @@ MATERIAL_DB = {
 
 def get_sld_from_material(name: str, density: float = None) -> float:
     """
-    물질 이름이나 밀도를 받아 SLD (10^-6 A^-2)를 반환합니다.
+    Return the SLD (10^-6 A^-2) of a material, optionally with a custom density.
 
     Args:
-        name: 물질 화학식 (예: 'Si', 'Au')
-        density: (선택) 밀도 값 (g/cm^3). 입력 시 DB 값 대신 사용됨.
+        name: chemical formula key of MATERIAL_DB (e.g. 'Si', 'Au').
+        density: optional density in g/cm^3, used instead of the DB value.
     """
     if name not in MATERIAL_DB:
         raise ValueError(f"Unknown material: {name}. Available: {list(MATERIAL_DB.keys())}")
@@ -27,25 +27,24 @@ def get_sld_from_material(name: str, density: float = None) -> float:
     mat = MATERIAL_DB[name]
     rho = density if density is not None else mat["rho"]
 
-    # 아보가드로 수 (mol^-1)
     N_A = 6.02214076e23
 
-    # 전자 밀도 (electrons / cm^3)
+    # Electron density in electrons/cm^3
     # rho_e = (rho * N_A * Z) / M
     rho_e = (rho * N_A * mat["Z"]) / mat["M"]
 
     # SLD = r_e * rho_e
-    # r_e는 usually Angstrom 단위 (approx 2.817e-5 A)
-    # rho_e는 cm^-3 이므로 Angstrom^-3으로 변환 필요 (1e-24 곱함)
+    # r_e is in Angstrom (about 2.817e-5); rho_e is per cm^3, so multiply by 1e-24
+    # to get per Angstrom^3
 
     sld_val = r_e * rho_e * 1e-24
 
-    # XRR에서는 보통 10^-6 A^-2 단위를 쓰므로 1e6을 곱해서 반환
+    # XRR convention: SLD in 10^-6 A^-2
     return sld_val * 1e6
 
 
 def calculate_sld(density: float, Z: int, M: float) -> float:
-    """수동으로 물성치를 알 때 SLD 계산"""
+    """SLD (10^-6 A^-2) from density, summed atomic number Z and molar mass M."""
     N_A = 6.02214076e23
     rho_e = (density * N_A * Z) / M
     sld = r_e * rho_e * 1e-24

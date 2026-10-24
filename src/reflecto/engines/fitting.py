@@ -12,8 +12,6 @@ from .script_builder import GenXScriptBuilder
 
 @dataclass
 class XRRConfig:
-    """범용 XRR 분석을 위한 물리학적 파라미터 설정"""
-
     wavelength: float = 1.5406
     beam_width: float = 0.1
     sample_len_init: float = 10.0
@@ -73,22 +71,21 @@ class GenXFitter:
             self.pars_map[name.replace("v.set_", "set_").replace("v.", "")] = p
             return p
 
-        # [1] Main Film: ±150A 윈도우 전략
         add_par("v.set_f_d", d_ai, max(10.0, d_ai * 0.9), d_ai * 1.1)
         add_par("v.set_f_sig", sig_ai, max(0, sig_ai * 0.9), sig_ai * 1.1)
         add_par("v.set_f_sld", sld_ai, max(5.0, sld_ai * 0.9), min(150.0, sld_ai * 1.1))
 
-        # [2] Substrate Oxide (SiO2): 저각 위상 조절의 핵심
+        # The SiO2 layer controls the low-angle phase
         add_par("v.set_s_d", 15.0, 0.01, 55.0)
         add_par("v.set_s_sig", 3.0, 0.5, 15.0)
         add_par("v.set_s_sld", 16, 5.0, 20.0)
 
-        # [3] Instrument: I0 범위를 넓혀 강도 보상 허용
+        # Wide I0 range lets the fit absorb intensity-scale errors
         add_par("v.set_i0", 1.0, 0.1, 20.0)
         add_par("v.set_ibkg", 1e-7, 1e-10, 1e-4)
 
-        # [교정] L 파라미터가 40mm를 넘으면 1인치 시료에서 오차가 발생함
-        # 실제 시료 크기가 작다면 max_v를 25.0 정도로 줄이는 것이 저각에 유리합니다.
+        # Lengths above 40 mm give errors on a 1-inch sample; for a smaller sample,
+        # lowering the upper bound to about 25 helps at low angles.
         add_par("v.set_s_len", cfg.sample_len_init, 5.0, 45.0)
 
         model.parameters = pars
@@ -99,21 +96,21 @@ class GenXFitter:
         if verbose:
             self._print_header()
 
-        # [Step 1] INITIAL ANCHORING: I0만 맞추기
+        # Disabled stage: fit only I0 and the background first
         # start = time.time()
         # model.set_fom_func(fom_funcs.R1)
         # self._set_active_params(["set_i0", "set_ibkg"])
         # model.bumps_update_parameters(model.bumps_fit(method="de", steps=200, pop=15))
         # if verbose: self._print_status("ANCHORING", time.time() - start)
 
-        # [Step 2] MICRO-REFINEMENT: 아주 좁은 범위에서만 허용
+        # Disabled stage: refine only within a very narrow range
         # start = time.time()
         # model.set_fom_func(fom_funcs.logR2)
         # self._set_active_params(["set_f_d", "set_f_sld", "set_f_sig", "set_i0"])
         # model.bumps_update_parameters(model.bumps_fit(method="de", steps=400, pop=cfg.pop_size))
         # if verbose: self._print_status("REFINEMENT", time.time() - start)
 
-        # [Step 3] SUBSTRATE MATCHING: 산화막 위상 조정
+        # Fit the oxide layer together with I0
         start = time.time()
         model.set_fom_func(fom_funcs.logR2)
         self._set_active_params(["set_s_d", "set_s_sig", "set_s_d", "set_i0"])
@@ -121,7 +118,6 @@ class GenXFitter:
         if verbose:
             self._print_status("SUBSTRATE", time.time() - start)
 
-        # [Step 4] FINAL POLISHING: 전체 미세 보정
         start = time.time()
         self._set_active_params(
             [

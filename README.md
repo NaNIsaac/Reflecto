@@ -25,7 +25,9 @@ from reflecto.utils.math_utils import i0_normalize
 df = reflecto.read_dat("sample.dat")  # two columns: tth, intensity (whitespace, # comments)
 q = reflecto.tth2q(df["tth"].to_numpy())
 R = i0_normalize(df["intensity"].to_numpy())
-result = reflecto.analyze(q, R, fit=True)  # result["prediction"], result["fit_params"], result["fom"]
+result = reflecto.analyze(
+    q, R, fit=True
+)  # result["prediction"], result["fit_params"], result["fom"]
 reflecto.plot_analysis_result(q, R, result)
 ```
 

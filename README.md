@@ -4,7 +4,7 @@ Single-layer X-ray reflectivity (XRR) analysis: a 1D CNN predicts film thickness
 
 The bundled weights (`src/reflecto/assets/best.pt`, `stats.pt`, `config.json`) come from experiment exp07 in [ReflectoExp](https://github.com/NaNIsaac/ReflectoExp) as of December 2025: `config.json` has the values of exp07's `config.py` at ReflectoExp b93c91f (2025-12-23: `exp_name` "cubic", fixed SiO₂ SLD 18.8, roughness 0-15 Å), not those of its current config.
 
-Reflecto is one of the XRR research branches (CNN guess, then GenX differential evolution). [ReflectoLearn](https://github.com/NaNIsaac/ReflectoLearn) carries an adapted copy of the GenX fit as `reflectolearn.genx_fit` (ReflectoLearn 6e160db). No comparison of the two approaches has been run, and the electron-density profile and density-ratio output here have no counterpart there.
+Reflecto is one of the XRR research branches (CNN guess, then GenX differential evolution). [ReflectoLearn](https://github.com/NaNIsaac-Research/ReflectoLearn) carries an adapted copy of the GenX fit as `reflectolearn.genx_fit` (ReflectoLearn 6e160db). No comparison of the two approaches has been run, and the electron-density profile and density-ratio output here have no counterpart there.
 
 ## Requirements
 

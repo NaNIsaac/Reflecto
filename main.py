@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import reflecto
@@ -20,8 +21,10 @@ def main():
 
     theo_sld, theo_rho_e = calc_theoretical_sld(target_density, in2o3_total_z, in2o3_molar_mass)
 
-    data_dir = Path("test_data") / "In2O3_Ar_30nm"
-    file_path = data_dir / "#2_xrr.dat"
+    if len(sys.argv) != 2:
+        print("Usage: uv run main.py <curve.dat>")
+        return
+    file_path = Path(sys.argv[1])
 
     if not file_path.exists():
         print(f"❌ Error: File not found at {file_path}")

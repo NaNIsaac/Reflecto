@@ -13,10 +13,10 @@ Python 3.13 or newer with [uv](https://docs.astral.sh/uv/). `pyproject.toml` has
 ```powershell
 uv sync
 $env:PYTHONPATH = "src"
-uv run main.py
+uv run main.py path\to\curve.dat
 ```
 
-`main.py` analyses `test_data/In2O3_Ar_30nm/#2_xrr.dat`, an In₂O₃ film of about 30 nm: CNN prediction, GenX fit, the density ratio against bulk and the figure of merit, then plots of the reflectivity curve and the electron-density profile. For another file, change `data_dir` and `file_path` in `main.py`.
+`main.py` analyses one measured curve (two columns, 2θ and intensity) of an In₂O₃ film: CNN prediction, GenX fit, the density ratio against bulk and the figure of merit, then plots of the reflectivity curve and the electron-density profile. For another material, change the In₂O₃ constants at the top of `main()`. No measured data ships with the repository.
 
 ```python
 import reflecto
@@ -40,7 +40,6 @@ src/reflecto/
   simulate/          GenX reflectivity simulation, noise, SLD profiles
   utils/             .dat reading, 2θ to q, SLD and density conversion, GenX layer constants
   assets/            trained weights (best.pt, about 64 MB)
-test_data/In2O3_Ar_30nm/   measured data, GenX .hgx projects, scripts for the result figures
 ```
 
 Dependencies: numpy, torch, genx3, bumps, pandas, matplotlib, tqdm (`pyproject.toml`, `uv.lock`).

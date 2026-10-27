@@ -118,6 +118,8 @@ class GenXFitter:
         if verbose:
             self._print_status("SUBSTRATE", time.time() - start)
 
+        # Every oxide parameter is free again: the first stage fitted them against the unrefined
+        # film, and an oxide roughness fixed from there keeps the fit off the true minimum
         start = time.time()
         self._set_active_params(
             [
@@ -125,6 +127,7 @@ class GenXFitter:
                 "set_f_sld",
                 "set_f_sig",
                 "set_s_d",
+                "set_s_sig",
                 "set_s_sld",
                 "set_i0",
                 "set_ibkg",

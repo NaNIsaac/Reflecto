@@ -1,6 +1,6 @@
 # Reflecto
 
-Single-layer X-ray reflectivity (XRR) analysis: a 1D CNN predicts film thickness, roughness and SLD from a measured curve (2θ, intensity `.dat`), then GenX refines a film-plus-SiO₂-on-Si model starting from that guess. Known problems: the GenX script puts the SiO₂ layer above the film while the training data had it below ([#3](https://github.com/NaNIsaac/Reflecto/issues/3)), and the background parameter is fitted but not applied ([#2](https://github.com/NaNIsaac/Reflecto/issues/2)).
+Single-layer X-ray reflectivity (XRR) analysis: a 1D CNN predicts film thickness, roughness and SLD from a measured curve (2θ, intensity `.dat`), then GenX refines a Si / SiO₂ / film model (native oxide under the film, the stack of the training data) starting from that guess.
 
 The bundled weights (`src/reflecto/assets/best.pt`, `stats.pt`, `config.json`) come from experiment exp07 in [ReflectoExp](https://github.com/NaNIsaac/ReflectoExp) as of December 2025: `config.json` has the values of exp07's `config.py` at ReflectoExp b93c91f (2025-12-23: `exp_name` "cubic", fixed SiO₂ SLD 18.8, roughness 0-15 Å), not those of its current config.
 
